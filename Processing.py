@@ -9,12 +9,14 @@ group_list_path = None
 def initiatePaths(up, gp, msg):
     global user_list_path, group_list_path
     user_list_path = up
+    msg.info("Path to user list file is set to {}".format(user_list_path))
     group_list_path = gp
+    msg.info("Path to group list file is set to {}".format(group_list_path))
     if not user_list_path:  # exiting the system as the files are not defined and all the operations do not work
-        msg("User list path is not defined")
+        msg.error("User list path is not defined")
         exit(1)
     if not group_list_path:
-        msg("Group list path is not defined")
+        msg.error("Group list path is not defined")
         exit(1)
 
 
@@ -92,9 +94,9 @@ def getGroupsMatch(args, msg):  # args is a map with key-value requirements
     for g in groups:
         add = True
         for k in args.keys():
-            if k == GROUP_LIST_KEY:
+            if k == GROUP_MEMBER_KEY:
                 for user in args[k]:
-                    if user not in g[k]:
+                    if user not in g[GROUP_LIST_KEY]:
                         add = False
                         break
                 if not add:

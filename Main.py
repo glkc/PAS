@@ -54,7 +54,7 @@ async def getGroupsMatchList(req):
     conditions = req.args
     logger.info("Requesting group list with requirements - {}".format(conditions))
     for key in conditions.keys():
-        if key not in GROUP_KEYS:
+        if key not in GROUP_KEYS and key != GROUP_MEMBER_KEY:
             return json({MESSAGE_KEY: "Invalid key {} for group condition".format(key)}, status=CONFLICT_ERROR_CODE)
     return returnData(getGroupsMatch(conditions, inner_log))
 
@@ -80,26 +80,28 @@ def getArgs():
                         help='Port address on which the service is exposed on the host (Default-{})'.format(HOST_PORT),
                         default=HOST_PORT)
     parser.add_argument('--user_path',
-                        help='Path to file location containing users list (Default-{})'.format(USER_LIST_FILE_PATH),
-                        default=USER_LIST_FILE_PATH)
+                        help='Path to file location containing users list (Default-{})'.format(
+                            DEFAULT_USER_LIST_FILE_PATH),
+                        default=DEFAULT_USER_LIST_FILE_PATH)
     parser.add_argument('--group_path',
-                        help='Path to file location containing groups data (Default-{})'.format(GROUP_LIST_FILE_PATH),
-                        default=GROUP_LIST_FILE_PATH)
+                        help='Path to file location containing groups data (Default-{})'.format(
+                            DEFAULT_GROUP_LIST_FILE_PATH),
+                        default=DEFAULT_GROUP_LIST_FILE_PATH)
     p_args = parser.parse_args()
     if p_args.host != HOST_ADDRESS:  # ASSUME: user provides the input correctly in format
         logger.debug("Overriding default host address {} with user input {}".format(HOST_ADDRESS, p_args.host))
     if p_args.port != HOST_PORT:  # ASSUME: user provides the input correctly in format
         logger.debug("Overriding default port {} with user input {}".format(HOST_PORT, p_args.port))
-    if p_args.user_path != USER_LIST_FILE_PATH:  # ASSUME: user provides the input correctly in format
-        logger.debug("Overriding default path to user list {} with user input {}".format(USER_LIST_FILE_PATH,
+    if p_args.user_path != DEFAULT_USER_LIST_FILE_PATH:  # ASSUME: user provides the input correctly in format
+        logger.debug("Overriding default path to user list {} with user input {}".format(DEFAULT_USER_LIST_FILE_PATH,
                                                                                          p_args.user_path))
-    if p_args.group_path != GROUP_LIST_FILE_PATH:  # ASSUME: user provides the input correctly in format
-        logger.debug("Overriding default path to group list {} with user input {}".format(GROUP_LIST_FILE_PATH,
+    if p_args.group_path != DEFAULT_GROUP_LIST_FILE_PATH:  # ASSUME: user provides the input correctly in format
+        logger.debug("Overriding default path to group list {} with user input {}".format(DEFAULT_GROUP_LIST_FILE_PATH,
                                                                                           p_args.group_path))
     return p_args
 
 
 if __name__ == "__main__":
     args = getArgs()
-    initiatePaths(args.user_path, args.group_path, logger.error)
+    initiatePaths(args.user_path, args.group_path, logger)
     app.run(host=args.host, port=args.port, debug=ENABLE_DEBUG)
