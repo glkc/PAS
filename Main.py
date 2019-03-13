@@ -5,11 +5,71 @@ from Processing import *
 import argparse
 
 app = Sanic()
+inner_log = logger.debug
 
 
 @app.route("/")
-async def test(request):
-    return json({"hello": "world"})
+async def home(req):
+    return json({"Message": "Welcome to PAAS (Passwd As A Service). Refer the documentation at "
+                            "\'https://github.com/glkc/PAS\' for directions."})
+
+
+@app.route("/users")
+async def getUsersList(req):
+    logger.info("Requesting users list")
+    return returnData(getUsers(inner_log))
+    # returning the response as json instead of html beautification
+
+
+@app.route("/users/query")
+async def getUsersMatchList(req):
+    conditions = req.args
+    logger.info("Requesting user list with requirements - {}".format(conditions))
+    for key in conditions.keys():
+        if key not in USER_KEYS:
+            return json({MESSAGE_KEY: "Invalid key {} for user condition".format(key)}, status=CONFLICT_ERROR_CODE)
+    return returnData(getUsersMatch(conditions, inner_log))
+
+
+@app.route("/users/<uid>")
+async def getUserById(req, uid):
+    logger.info("Requesting details of user id - {}".format(uid))
+    return returnData(getUserByUserId(uid, inner_log))
+
+
+@app.route("users/<uid>/groups")
+async def getGroupsListByUserId(req, uid):
+    logger.info("Requesting List of groups with user {} as a member".format(uid))
+    return returnData(getGroupsByUserId(uid, inner_log))
+
+
+@app.route("/groups")
+async def getGroupsList(req):
+    logger.info("Requesting list of groups")
+    return returnData(getGroups(inner_log))
+
+
+@app.route("/groups/query")
+async def getGroupsMatchList(req):
+    conditions = req.args
+    logger.info("Requesting group list with requirements - {}".format(conditions))
+    for key in conditions.keys():
+        if key not in GROUP_KEYS:
+            return json({MESSAGE_KEY: "Invalid key {} for group condition".format(key)}, status=CONFLICT_ERROR_CODE)
+    return returnData(getGroupsMatch(conditions, inner_log))
+
+
+@app.route("/groups/<gid>")
+async def getGroupById(req, gid):
+    logger.info("Requesting details of the group id - {}".format(gid))
+    return returnData(getGroupsByGroupId(gid, inner_log))
+
+
+def returnData(ret):
+    if STATUS_KEY in ret:
+        logger.warn("Error obtaining data")
+        return json({MESSAGE_KEY: ret[MESSAGE_KEY]}, status=ret[STATUS_KEY])
+    return json(ret)
 
 
 def getArgs():
@@ -41,5 +101,5 @@ def getArgs():
 
 if __name__ == "__main__":
     args = getArgs()
-    initiatePaths(args.user_path, args.group_path, logger)
+    initiatePaths(args.user_path, args.group_path, logger.error)
     app.run(host=args.host, port=args.port, debug=ENABLE_DEBUG)
