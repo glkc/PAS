@@ -11,8 +11,8 @@ def initiatePaths(up, gp, l):
     global user_list_path, group_list_path, logger
     user_list_path = up
     group_list_path = gp
-    logger = l  # ASSUME: logger is valid
-    if not user_list_path:
+    logger = l  # ASSUME: logger 'l' is valid
+    if not user_list_path:  # exiting the system as the files are not defined and all the operations do not work
         logger.error("User list path is not defined")
         exit(1)
     if not group_list_path:
@@ -25,21 +25,21 @@ def getUsers():
         ret = []
         with open(user_list_path) as f:
             for user in f:
-                ret.append(User(user.split(":")).getUserData())
-        logger.debug("List of users is extracted")
+                ret.append(User(user.split(":")).getUserData())  # split string line by ':'
+        logger.debug("List of users is extracted from - {}".format(user_list_path))
         return ret
     else:
         return {MESSAGE_KEY: "User File is not available at {}".format(user_list_path), STATUS_KEY: 409}
 
 
-def getUserByUserId(uid):  # uid is unique
+def getUserByUserId(uid):  # ASSUME: uid is unique
     user = getUsersMatch({USER_ID_KEY: uid})
     if STATUS_KEY in user or not user:
         return {MESSAGE_KEY: "User Id {} Not found".format(uid), STATUS_KEY: 404}
     return user[0]
 
 
-def getUsersMatch(args):
+def getUsersMatch(args):  # args is a map with key-value requirements
     users = getUsers()
     if STATUS_KEY in users:
         return {MESSAGE_KEY: "Error getting users list-{}".format(users[MESSAGE_KEY]), STATUS_KEY: users[STATUS_KEY]}
@@ -47,8 +47,9 @@ def getUsersMatch(args):
     for user in users:
         add = True
         for k in args.keys():
-            if args[k] != user[k]:
-                add = False
+            if args[k] != user[k]:  # checking if all the requirements match
+                logger.debug("User {} does not match the requirements at {}".format(user[USER_ID_KEY], k))
+                add = False  # requirement did not match
                 break
         if add:
             ret.append(user)
@@ -61,7 +62,7 @@ def getGroups():
         with open(group_list_path) as f:
             for group in f:
                 ret.append(Group(group.split(":")).getGroupData())
-        logger.debug("List of Groups is extracted")
+        logger.debug("List of Groups is extracted from {}".format(group_list_path))
         return ret
     else:
         return {MESSAGE_KEY: "Group list file is not available at {}".format(group_list_path), STATUS_KEY: 409}
@@ -75,14 +76,16 @@ def gerGroupsByUserId(uid):
     if STATUS_KEY in groups:
         return {MESSAGE_KEY: "Error getting groups list-{}".format(groups[MESSAGE_KEY]), STATUS_KEY: groups[STATUS_KEY]}
     ret = []
-    user_name = user[USER_NAME_KEY]
+    user_name = user[USER_NAME_KEY]  # ASSUME: user name is unique
+    logger.debug("Getting groups with user name {} corresponding to uid {} as a member".format(user_name, uid))
     for g in groups:
         if user_name in g[GROUP_LIST_KEY]:
+            logger.debug("User {} is present in Group Id {}".format(user_name, g[GROUP_ID_KEY]))
             ret.append(g)
     return ret
 
 
-def getGroupsMatch(args):
+def getGroupsMatch(args):  # args is a map with key-value requirements
     groups = getGroups()
     if STATUS_KEY in groups:
         return {MESSAGE_KEY: "Error getting groups list-{}".format(groups[MESSAGE_KEY]), STATUS_KEY: groups[STATUS_KEY]}
@@ -90,8 +93,9 @@ def getGroupsMatch(args):
     for g in groups:
         add = True
         for k in args.keys():
-            if args[k] != g[k]:
-                add = False
+            if args[k] != g[k]:  # checking if all the requirements match
+                logger.debug("Group {} does not match the requirements at {}".format(g[GROUP_ID_KEY], k))
+                add = False  # requirement did not match
                 break
         if add:
             ret.append(g)
