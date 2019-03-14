@@ -109,7 +109,7 @@ class NegRestTests(unittest.TestCase):
     def testGetUserById(self):  # checking if an unavailable users data is not obtained
         user_check_id = '500'
         req, resp = app.test_client.get('/users/{}'.format(user_check_id))
-        self.assertEqual(resp.status, NOT_FOUND_CODE, "Error Obtaining user data-{}".format(resp.text))
+        self.assertEqual(resp.status, NOT_FOUND_CODE, "user data-{} should not be obtained".format(resp.text))
 
     def testGetUserMatches(self):  # checking combinations of matches in user data
         user_check_id = '104'
@@ -143,31 +143,6 @@ class NegRestTests(unittest.TestCase):
         self.assertEqual(resp.status, 200, "Error Obtaining group data-{}".format(resp.text))
         data = json.loads(resp.text)
         self.assertEqual(len(data), 0, "No group data should be obtained")
-
-    def testEmptyFilePath(self):
-        with self.assertRaises(SystemExit) as e:
-            initiatePaths("", TEST_GROUP_LIST_FILE_PATH, logger)
-            self.assertEqual(e.exception.code, 1)
-        with self.assertRaises(SystemExit) as e:
-            initiatePaths(TEST_USER_LIST_FILE_PATH, "", logger)
-            self.assertEqual(e.exception.code, 1)
-
-
-# class MultiRestTests(unittest.TestCase):
-#     def setUp(self):
-#         initiatePaths(TEST_USER_LIST_FILE_PATH, TEST_GROUP_LIST_FILE_PATH, logger.error)
-#
-#     def testGetUsers(self):  # checking if correct error code is returned if file not present
-#         req, resp = app.test_client.get('/users')
-#         self.assertEqual(resp.status, 200,
-#                          "Error Obtaining users list from {}-{}".format(TEST_USER_LIST_FILE_PATH, resp.text))
-#         data = json.loads(resp.text)
-#         tot = None
-#         with open(TEST_USER_LIST_FILE_PATH) as f:
-#             tot = sum(1 for _ in f)
-#         self.assertEqual(len(data), tot,
-#                          "Error processing user list from {}.".format(TEST_USER_LIST_FILE_PATH) +
-#                          "{} users data is processed instead of {}".format(len(data), tot))
 
 
 if __name__ == '__main__':

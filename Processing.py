@@ -95,7 +95,7 @@ def getGroupsMatch(args, msg):  # args is a map with key-value requirements
         add = True
         for k in args.keys():
             if k == GROUP_MEMBER_KEY:
-                for user in args[k]:
+                for user in args[k]:  # ASSUME: member key will be a list
                     if user not in g[GROUP_LIST_KEY]:
                         add = False
                         break

@@ -3,6 +3,7 @@ from sanic.response import json
 from sanic.log import logger
 from Processing import *
 import argparse
+import asyncio
 
 app = Sanic()
 inner_log = logger.debug
@@ -104,4 +105,8 @@ def getArgs():
 if __name__ == "__main__":
     args = getArgs()
     initiatePaths(args.user_path, args.group_path, logger)
-    app.run(host=args.host, port=args.port, debug=ENABLE_DEBUG)
+    server = app.run(host=args.host, port=args.port, debug=ENABLE_DEBUG)
+
+    loop = asyncio.get_event_loop()
+    task = asyncio.ensure_future(server)
+    loop.run_forever()

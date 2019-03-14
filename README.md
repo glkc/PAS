@@ -7,6 +7,7 @@ PAAS also known as Passwd As A Service, exposes the user and group information o
 * Python 3
 * [sanic](https://sanic.readthedocs.io/en/latest/sanic/getting_started.html#install-sanic)
 * aiohttp (for unit testing)
+* locustio (for load testing)
  
 ## Instructions
 * Parameters Host and Port on which the service to be accessible can be set via runtime variable as mentioned below.
@@ -66,7 +67,9 @@ Data from the files can be accessed via the following routes on address http://H
     * Any group containing all the specified members is returned, i.e. when query members are a subset of group members.
 
 ## Unit Tests
-Unit tests are written for certain scenarios and it can be running the file Test.py
+Unit tests are written for certain scenarios and it can be verified by running the respective file *Test.py
 ```
-> python Test.py 
+> python LogicTest.py 
+> python PathTest.py
+> locust -f LoadTest.py --host=http://HOST:PORT
 ```
